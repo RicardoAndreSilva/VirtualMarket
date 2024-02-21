@@ -34,7 +34,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.valueOf(e.getStatusCode())).build();
         }
     }
-
     @PutMapping("/users/{userId}")
     private ResponseEntity<String> updateUser(@PathVariable("userId") int userId,
         @RequestBody UserEntity updatedUser) {
@@ -45,8 +44,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.valueOf(e.getStatusCode())).build();
         }
     }
-
-
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         try {
@@ -56,8 +53,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.valueOf(e.getStatusCode())).build();
         }
     }
-
-
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable("userId") int userId) {
         try {

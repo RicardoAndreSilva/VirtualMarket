@@ -37,7 +37,7 @@ public class UserService {
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            throw new HttpException("Fail to create user", INTERNAL_SERVER_ERROR);
+            throw new HttpException("Failed to create user", INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -52,7 +52,7 @@ public class UserService {
                 userRepository.save(user);
                 return mapper.map(user, UserResponse.class);
             } catch (Exception e) {
-                throw new HttpException("Fail to update User", INTERNAL_SERVER_ERROR);
+                throw new HttpException("Failed to update User", INTERNAL_SERVER_ERROR);
             }
         } else {
             throw new HttpException("User not found", NOT_FOUND);
@@ -65,7 +65,7 @@ public class UserService {
                 .map(user -> mapper.map(user, UserResponse.class))
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new HttpException("Fail to get users", INTERNAL_SERVER_ERROR);
+            throw new HttpException("Failed to get users", INTERNAL_SERVER_ERROR);
         }
     }
 
