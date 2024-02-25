@@ -4,7 +4,7 @@ import pt.virtualmarket.userservice.entities.UserEntity;
 
 public class UserCreator {
 
- public static UserEntity createUserToBeSaved(){
+  public static UserEntity createUserToBeSaved() {
     return UserEntity.builder()
         .age("20")
         .email("Rs.silva.1985@hotmail.com")
@@ -12,7 +12,8 @@ public class UserCreator {
         .build();
 
   }
-  public static UserEntity createValidUser(){
+
+  public static UserEntity createValidUser() {
     return UserEntity.builder()
         .id(1)
         .age("20")
@@ -21,8 +22,10 @@ public class UserCreator {
         .build();
 
   }
-  public static UserEntity createValidUpdatedUser(){
+
+  public static UserEntity createValidUpdatedUser() {
     return UserEntity.builder()
+        .id(1)
         .age("20")
         .email("Rs.silva.1985@hotmail.com")
         .name("john")

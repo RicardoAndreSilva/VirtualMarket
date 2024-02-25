@@ -17,7 +17,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/users/{userId}")
-    private ResponseEntity<UserResponse> getUserDetails(@PathVariable("userId") int userId) {
+    public ResponseEntity<UserResponse> getUserDetails(@PathVariable("userId") int userId) {
         try {
             UserResponse userResponse = userService.getUserById(userId);
             return ResponseEntity.status(HttpStatus.OK).body(userResponse);
@@ -26,7 +26,7 @@ public class UserController {
         }
     }
     @PostMapping("/users")
-    private ResponseEntity<String> saveUser(@RequestBody UserEntity user) {
+    public ResponseEntity<String> saveUser(@RequestBody UserEntity user) {
         try {
             userService.createUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User created");
@@ -35,7 +35,7 @@ public class UserController {
         }
     }
     @PutMapping("/users/{userId}")
-    private ResponseEntity<String> updateUser(@PathVariable("userId") int userId,
+    public ResponseEntity<String> updateUser(@PathVariable("userId") int userId,
         @RequestBody UserEntity updatedUser) {
         try {
             userService.updateUserById(userId, updatedUser);
