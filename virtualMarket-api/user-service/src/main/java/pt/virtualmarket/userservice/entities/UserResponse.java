@@ -1,44 +1,59 @@
 package pt.virtualmarket.userservice.entities;
 
+import lombok.Builder;
+import lombok.Data;
+
+@Builder
+@Data
 public class UserResponse {
 
-    private int id;
-    private String name;
-    private String email;
+  private int id;
+  private String name;
+  private String email;
 
-    private String age;
+  private String age;
 
-    public int getId() {
-        return id;
-    }
+  public UserResponse(int id, String name, String email, String age) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.age = age;
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  public UserResponse() {
+  }
 
-    public String getName() {
-        return name;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getAge() {
-        return age;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public void setAge(String age) {
-        this.age = age;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getAge() {
+    return age;
+  }
+
+  public void setAge(String age) {
+    this.age = age;
+  }
 }
 
 

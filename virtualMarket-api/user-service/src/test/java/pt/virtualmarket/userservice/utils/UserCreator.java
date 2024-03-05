@@ -1,6 +1,7 @@
 package pt.virtualmarket.userservice.utils;
 
 import pt.virtualmarket.userservice.entities.UserEntity;
+import pt.virtualmarket.userservice.entities.UserResponse;
 
 public class UserCreator {
 
@@ -13,11 +14,19 @@ public class UserCreator {
 
   }
 
+  public static UserResponse createUserToUserResponse() {
+    return UserResponse.builder()
+        .age("20")
+        .email("teste5@hotmail.com")
+        .name("john")
+        .build();
+
+  }
+
   public static UserEntity createValidUser() {
     return UserEntity.builder()
-        .id(1)
         .age("20")
-        .email("Rs.silva.1985@hotmail.com")
+        .email("teste5@hotmail.com")
         .name("john")
         .build();
 
@@ -27,8 +36,8 @@ public class UserCreator {
     return UserEntity.builder()
         .id(1)
         .age("20")
-        .email("Rs.silva.1985@hotmail.com")
-        .name("john")
+        .email("teste@hotmail.com")
+        .name("userResponse")
         .build();
   }
 }

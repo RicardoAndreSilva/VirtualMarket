@@ -36,7 +36,7 @@ class UserRepositoryTest {
     UserEntity userToBeSaved = UserCreator.createUserToBeSaved();
     UserEntity userSaved = this.userRepository.save(userToBeSaved);
 
-    userSaved.setName("Miguel oliveira");
+    userSaved.setName("user test");
     userSaved.setEmail("teste@gmail.com");
     userSaved.setAge("25");
 

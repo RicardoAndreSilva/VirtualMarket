@@ -34,8 +34,8 @@ class UserControllerTest {
 
   @BeforeEach
   void setUp_userServiceMock_for() {
-    mapper = new ModelMapper();
-    UserResponse userResponse = mapper.map(UserCreator.createValidUser(), UserResponse.class);
+    ModelMapper mapper2 = new ModelMapper();
+    UserResponse userResponse = mapper2.map(UserCreator.createValidUser(), UserResponse.class);
 
     BDDMockito.when(userServiceMock.getAllUsers()).thenReturn(List.of(userResponse));
     BDDMockito.doNothing().when(userServiceMock).deleteUserById(ArgumentMatchers.anyInt());
@@ -49,7 +49,7 @@ class UserControllerTest {
   }
 
   @Test
-  @DisplayName("Test for getAllUsers returns list of users  when successful")
+  @DisplayName("Test for getAllUsers returns list of users when successful")
   void testGetAllUsers_returnsListOfUsers_WhenSuccessful() {
     ResponseEntity<List<UserResponse>> responseEntity = userController.getAllUsers();
 
@@ -59,14 +59,17 @@ class UserControllerTest {
     List<UserResponse> userResponses = responseEntity.getBody();
     Assertions.assertThat(userResponses).isNotNull().isNotEmpty();
 
-    Assertions.assertThat(userResponses.get(0).getName())
-        .isEqualTo(UserCreator.createValidUser().getName());
-    Assertions.assertThat(userResponses.get(0).getEmail())
-        .isEqualTo(UserCreator.createValidUser().getEmail());
-    Assertions.assertThat(userResponses.get(0).getId())
-        .isEqualTo(UserCreator.createValidUser().getId());
-    Assertions.assertThat(userResponses.get(0).getAge())
-        .isEqualTo(UserCreator.createValidUser().getAge());
+    UserResponse user = userResponses.get(0);
+    UserEntity mockUser = UserCreator.createValidUser();
+
+    Assertions.assertThat(user.getName())
+        .isEqualTo(mockUser.getName());
+    Assertions.assertThat(user.getEmail())
+        .isEqualTo(mockUser.getEmail());
+    Assertions.assertThat(user.getId())
+        .isEqualTo(mockUser.getId());
+    Assertions.assertThat(user.getAge())
+        .isEqualTo(mockUser.getAge());
   }
 
   @Test
@@ -98,21 +101,23 @@ class UserControllerTest {
     Assertions.assertThat(userResponseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     Assertions.assertThat(userResponseEntity.getBody()).isEqualTo("User created");
 
-    BDDMockito.verify(userServiceMock, Mockito.times(1)).createUser(ArgumentMatchers.any());
+    Mockito.verify(userServiceMock, Mockito.times(1)).createUser(ArgumentMatchers.any());
   }
 
   @Test
   @DisplayName("Test for update user when successful")
   void testUpdateUser_ReturnsOk_WhenSuccessful() {
     Assertions.assertThatCode(() -> {
-      userController.updateUser(1, UserCreator.createValidUser());
+      userController.updateUser(1, UserCreator.createValidUpdatedUser());
     }).doesNotThrowAnyException();
 
-    ResponseEntity<String> entity = userController.updateUser(2, UserCreator.createUserToBeSaved());
+    ResponseEntity<String> entity = userController.updateUser(2,
+        UserCreator.createValidUpdatedUser());
 
     Assertions.assertThat(entity).isNotNull();
     Assertions.assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
+
 
   @Test
   @DisplayName("delete removes user successful")
