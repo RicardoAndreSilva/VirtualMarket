@@ -82,6 +82,21 @@ class UserControllerTestIT {
 
   }
 
+//  @Test
+//  @DisplayName("Test for save returns CONFLICT when user already exists")
+//  void testSaveUser_ReturnsCONFLICT_WhenUserAlreadyExists() {
+//
+//    testRestTemplate.postForEntity(
+//        "http://localhost:" + port + "/users", UserCreator.createUserToBeSaved(), Void.class);
+//
+//    ResponseEntity<Void> res = testRestTemplate.postForEntity(
+//        "http://localhost:" + port + "/users",
+//        UserCreator.createUserToBeSaved(), Void.class);
+//
+//    Assertions.assertThat(res.getStatusCode())
+//        .as("Check that the status code is CONFLICT").isEqualTo(HttpStatus.CONFLICT);
+//  }
+
   @Test
   @DisplayName("Delete returns user when successful")
   void delete_ReturnsUser_WhenSuccessful() {

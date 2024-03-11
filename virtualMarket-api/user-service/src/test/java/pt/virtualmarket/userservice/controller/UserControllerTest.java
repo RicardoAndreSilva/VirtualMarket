@@ -1,12 +1,16 @@
 package pt.virtualmarket.userservice.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pt.virtualmarket.userservice.entities.UserEntity;
 import pt.virtualmarket.userservice.entities.UserResponse;
+import pt.virtualmarket.userservice.exceptions.HttpException;
 import pt.virtualmarket.userservice.services.UserService;
 import pt.virtualmarket.userservice.utils.UserCreator;
 
@@ -37,13 +42,13 @@ class UserControllerTest {
     ModelMapper mapper2 = new ModelMapper();
     UserResponse userResponse = mapper2.map(UserCreator.createValidUser(), UserResponse.class);
 
-    BDDMockito.when(userServiceMock.getAllUsers()).thenReturn(List.of(userResponse));
-    BDDMockito.doNothing().when(userServiceMock).deleteUserById(ArgumentMatchers.anyInt());
-    BDDMockito.doNothing().when(userServiceMock).createUser(ArgumentMatchers.any());
-    BDDMockito.when(
-            userServiceMock.updateUserById(ArgumentMatchers.any(Integer.class), ArgumentMatchers.any()))
+    when(userServiceMock.getAllUsers()).thenReturn(List.of(userResponse));
+    BDDMockito.doNothing().when(userServiceMock).deleteUserById(anyInt());
+    BDDMockito.doNothing().when(userServiceMock).createUser(any());
+    when(
+        userServiceMock.updateUserById(any(Integer.class), any()))
         .thenReturn(userResponse);
-    BDDMockito.when(userServiceMock.getUserById(ArgumentMatchers.anyInt()))
+    when(userServiceMock.getUserById(anyInt()))
         .thenReturn(userResponse);
 
   }
@@ -73,6 +78,20 @@ class UserControllerTest {
   }
 
   @Test
+  @DisplayName("Test controller returns correct status code when HttpException is thrown during getAllUsers ")
+  void testGetAllUsersUsers_ReturnsCorrectStatusCode_WhenHttpExceptionThrown() {
+    UserEntity userEntity = UserCreator.createValidUpdatedUser();
+
+    doThrow(new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value()))
+        .when(userServiceMock)
+        .getAllUsers();
+
+    ResponseEntity<List<UserResponse>> response = userController.getAllUsers();
+
+    Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @Test
   @DisplayName("Test for getUserById returns user when successful")
   void testGetUserById_returnsUser_WhenSuccessful() {
     UserEntity expectedUser = UserCreator.createValidUser();
@@ -92,6 +111,20 @@ class UserControllerTest {
   }
 
   @Test
+  @DisplayName("Test controller returns correct status code when HttpException is thrown during user getById")
+  void testGetUserById_ReturnsCorrectStatusCode_WhenHttpExceptionThrown() {
+
+    UserEntity userEntity = UserCreator.createUserToBeSaved();
+
+    when(userServiceMock.getUserById(anyInt())).thenThrow(
+        new HttpException("User not found", HttpStatus.NOT_FOUND.value()));
+
+    ResponseEntity<UserResponse> response = userController.getUserDetails(userEntity.getId());
+
+    Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  @Test
   @DisplayName("Test for save user when successful")
   void testSaveUser_ReturnsOk_WhenSuccessful() {
     ResponseEntity<String> userResponseEntity = userController.saveUser(
@@ -101,8 +134,23 @@ class UserControllerTest {
     Assertions.assertThat(userResponseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     Assertions.assertThat(userResponseEntity.getBody()).isEqualTo("User created");
 
-    Mockito.verify(userServiceMock, Mockito.times(1)).createUser(ArgumentMatchers.any());
+    Mockito.verify(userServiceMock, Mockito.times(1)).createUser(any());
   }
+
+  @Test
+  @DisplayName("Test controller returns correct status code when HttpException is thrown during user save")
+  void testSaveUser_ReturnsCorrectStatusCode_WhenHttpExceptionThrown() {
+    UserEntity userEntity = UserCreator.createValidUser();
+
+    doThrow(new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value()))
+        .when(userServiceMock)
+        .createUser(any());
+
+    ResponseEntity<String> response = userController.saveUser(userEntity);
+
+    Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
 
   @Test
   @DisplayName("Test for update user when successful")
@@ -118,6 +166,20 @@ class UserControllerTest {
     Assertions.assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 
+  @Test
+  @DisplayName("Test controller returns correct status code when HttpException is thrown during user update")
+  void testUpdateUser_ReturnsCorrectStatusCode_WhenHttpExceptionThrown() {
+    UserEntity userEntity = UserCreator.createValidUpdatedUser();
+
+    doThrow(new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value()))
+        .when(userServiceMock)
+        .updateUserById(userEntity.getId(), userEntity);
+
+    ResponseEntity<String> response = userController.updateUser(userEntity.getId(), userEntity);
+
+    Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
 
   @Test
   @DisplayName("delete removes user successful")
@@ -129,5 +191,19 @@ class UserControllerTest {
 
     Assertions.assertThat(entity).isNotNull();
     Assertions.assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  }
+
+  @Test
+  @DisplayName("Test controller returns correct status code when HttpException is thrown during user delete")
+  void testDeleteUser_ReturnsCorrectStatusCode_WhenHttpExceptionThrown() {
+    UserEntity userEntity = UserCreator.createValidUpdatedUser();
+
+    doThrow(new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value()))
+        .when(userServiceMock)
+        .deleteUserById(userEntity.getId());
+
+    ResponseEntity<Void> response = userController.deleteUser(userEntity.getId());
+
+    Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

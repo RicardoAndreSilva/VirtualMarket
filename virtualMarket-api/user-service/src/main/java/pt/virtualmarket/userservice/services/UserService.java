@@ -26,18 +26,16 @@ public class UserService {
 
   public UserResponse getUserById(int id) {
     Optional<UserEntity> user = userRepository.findById(id);
-    if (user.isPresent()) {
-      return mapper.map(user, UserResponse.class);
-    } else {
-      throw new HttpException("User not found", NOT_FOUND);
-    }
+
+    return user.map(u -> mapper.map(u, UserResponse.class))
+        .orElseThrow(() -> new HttpException("User not found", NOT_FOUND));
   }
 
   public void createUser(UserEntity user) {
+    if (userRepository.existsById(user.getId())) {
+      throw new HttpException("User already exists", HttpStatus.CONFLICT.value());
+    }
     try {
-      if (userRepository.existsById(user.getId())) {
-        throw new HttpException("User already exists", HttpStatus.CONFLICT.value());
-      }
       userRepository.save(user);
     } catch (Exception e) {
       throw new HttpException("Failed to create user", INTERNAL_SERVER_ERROR);
@@ -45,20 +43,18 @@ public class UserService {
   }
 
   public UserResponse updateUserById(int userId, UserEntity userToUpdate) {
-    Optional<UserEntity> userEntity = userRepository.findById(userId);
-    if (userEntity.isPresent()) {
-      UserEntity user = userEntity.get();
-      user.setName(userToUpdate.getName());
-      user.setAge(userToUpdate.getAge());
-      user.setEmail(userToUpdate.getEmail());
-      try {
-        userRepository.save(user);
-        return mapper.map(user, UserResponse.class);
-      } catch (Exception e) {
-        throw new HttpException("Failed to update User", INTERNAL_SERVER_ERROR);
-      }
-    } else {
-      throw new HttpException("User not found", NOT_FOUND);
+    UserEntity user = userRepository.findById(userId)
+        .orElseThrow(() -> new HttpException("User not found", NOT_FOUND));
+
+    user.setName(userToUpdate.getName());
+    user.setAge(userToUpdate.getAge());
+    user.setEmail(userToUpdate.getEmail());
+
+    try {
+      userRepository.save(user);
+      return mapper.map(user, UserResponse.class);
+    } catch (Exception e) {
+      throw new HttpException("Failed to update User", INTERNAL_SERVER_ERROR);
     }
   }
 

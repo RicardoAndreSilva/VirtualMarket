@@ -8,7 +8,7 @@ public class UserCreator {
   public static UserEntity createUserToBeSaved() {
     return UserEntity.builder()
         .age("20")
-        .email("Rs.silva.1985@hotmail.com")
+        .email("junit5@hotmail.com")
         .name("john")
         .build();
 

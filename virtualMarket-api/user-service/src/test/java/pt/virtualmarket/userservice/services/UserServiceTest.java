@@ -58,6 +58,19 @@ class UserServiceTest {
   }
 
   @Test
+  @DisplayName("Test for getAllUsers throws exception when an error occurs")
+  void testGetAllUsers_Internal_Server_Error() {
+    when(userRepositoryMock.findAll()).thenThrow(RuntimeException.class);
+
+    HttpException exception = assertThrows(HttpException.class, () -> {
+      userService.getAllUsers();
+    });
+
+    Assertions.assertThat(exception.getStatusCode()).isEqualTo(500);
+    Assertions.assertThat(exception.getMessage()).isEqualTo("Failed to get users");
+  }
+
+  @Test
   @DisplayName("Test for getUserById returns user when successful")
   void testGetUserById_returnsUser_WhenSuccessful() {
     UserEntity userEntity = UserCreator.createValidUser();
@@ -99,6 +112,23 @@ class UserServiceTest {
   }
 
   @Test
+  @DisplayName("Test for save user when INTERNAL_SERVER_ERROR")
+  void testUpdateUserById_Internal_Server_Error_WhenSuccessful() {
+    when(userRepositoryMock.existsById(anyInt())).thenReturn(false);
+
+    UserEntity userToSave = UserCreator.createValidUser();
+
+    when(userRepositoryMock.save(any(UserEntity.class))).thenThrow(RuntimeException.class);
+
+    HttpException exception = assertThrows(HttpException.class, () -> {
+      userService.createUser(userToSave);
+    });
+
+    Assertions.assertThat(exception.getMessage()).isEqualTo("Failed to create user");
+    Assertions.assertThat(exception.getStatusCode()).isEqualTo(500);
+  }
+
+  @Test
   @DisplayName("Test for save user when successful")
   void testSaveUser_ReturnsOkWhenSuccessful() {
     when(userRepositoryMock.save(any(UserEntity.class)))
@@ -111,8 +141,40 @@ class UserServiceTest {
   }
 
   @Test
+  @DisplayName("Test for save user when CONFLICT")
+  void testSaveUser_Conflict_WhenConflict() {
+    when(userRepositoryMock.existsById(anyInt())).thenReturn(true);
+
+    UserEntity userToSave = UserCreator.createValidUser();
+
+    HttpException exception = assertThrows(HttpException.class, () -> {
+      userService.createUser(userToSave);
+    });
+
+    Assertions.assertThat(exception.getMessage()).isEqualTo("User already exists");
+    Assertions.assertThat(exception.getStatusCode()).isEqualTo(409);
+  }
+
+  @Test
+  @DisplayName("Test for save user when successful")
+  void testSaveUser_Internal_Server_Error_WhenSuccessful() {
+    when(userRepositoryMock.existsById(anyInt())).thenReturn(false);
+
+    UserEntity userToSave = UserCreator.createValidUser();
+
+    when(userRepositoryMock.save(any(UserEntity.class))).thenThrow(RuntimeException.class);
+
+    HttpException exception = assertThrows(HttpException.class, () -> {
+      userService.createUser(userToSave);
+    });
+
+    Assertions.assertThat(exception.getMessage()).isEqualTo("Failed to create user");
+    Assertions.assertThat(exception.getStatusCode()).isEqualTo(500);
+  }
+
+  @Test
   @DisplayName("Test updates user when successful")
-  void testUpdatesUser_ReturnsOkWhenSuccessful() {
+  void testUpdatesUser_ReturnsOk_WhenSuccessful() {
     when(userRepositoryMock.save(any(UserEntity.class)))
         .thenReturn(UserCreator.createUserToBeSaved());
 
@@ -125,20 +187,38 @@ class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Test for updateUserById throws exception when NOT FOUND")
-  void testUpdateUser_ReturnsNOT_FOUND_WhenNotFound() {
+  @DisplayName("Test for updateUserById throws exception when Failed to update User")
+  void testUpdateUser_ReturnsFailed_WhenFailed() {
+    UserEntity userEntity = UserCreator.createUserToBeSaved();
 
-    when(userRepositoryMock.existsById(anyInt())).thenReturn(false);
+    when(userRepositoryMock.findById(anyInt())).thenReturn(
+        Optional.ofNullable(userEntity));
+
+    when(userRepositoryMock.save(any(UserEntity.class))).thenThrow(RuntimeException.class);
 
     HttpException exception = assertThrows(HttpException.class, () -> {
-      userService.updateUserById(1, UserCreator.createUserToBeSaved());
+      userService.updateUserById(userEntity.getId(), UserCreator.createUserToBeSaved());
+    });
+
+    Assertions.assertThat(exception.getStatusCode()).isEqualTo(500);
+
+    Assertions.assertThat(exception.getMessage()).isEqualTo("Failed to update User");
+  }
+
+  @Test
+  @DisplayName("Test for updateUserById throws exception when NOT FOUND")
+  void testUpdateUser_Not_Found_WhenNotFound() {
+    UserEntity userEntity = UserCreator.createUserToBeSaved();
+
+    when(userRepositoryMock.findById(anyInt())).thenReturn(Optional.empty());
+
+    HttpException exception = assertThrows(HttpException.class, () -> {
+      userService.updateUserById(userEntity.getId(), UserCreator.createUserToBeSaved());
     });
 
     Assertions.assertThat(exception.getStatusCode()).isEqualTo(404);
-
     Assertions.assertThat(exception.getMessage()).isEqualTo("User not found");
   }
-
 
   @Test
   @DisplayName("delete removes user successful")
@@ -163,4 +243,5 @@ class UserServiceTest {
     Assertions.assertThat(exception.getMessage()).isEqualTo("User not found");
   }
 }
+
 
